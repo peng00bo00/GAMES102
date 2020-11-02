@@ -16,6 +16,14 @@ struct Ubpa::USRefl::TypeInfo<CanvasData>
         Field{"opt_enable_grid", &CanvasData::opt_enable_grid},
         Field{"opt_enable_context_menu", &CanvasData::opt_enable_context_menu},
         Field{"adding_line", &CanvasData::adding_line},
+        Field{"drawUniformParameterization", &CanvasData::drawUniformParameterization},
+        Field{"drawChordalParameterization", &CanvasData::drawChordalParameterization},
+        Field{"drawCentripetalParameterization", &CanvasData::drawCentripetalParameterization},
+        Field{"drawFoleyParameterization", &CanvasData::drawFoleyParameterization},
+        Field{"uniformParameterization", &CanvasData::uniformParameterization},
+        Field{"chordalParameterization", &CanvasData::chordalParameterization},
+        Field{"centripetalParameterization", &CanvasData::centripetalParameterization},
+        Field{"foleyParameterization", &CanvasData::foleyParameterization},
     };
 };
 
