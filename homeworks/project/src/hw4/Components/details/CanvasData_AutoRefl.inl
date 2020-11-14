@@ -12,10 +12,19 @@ struct Ubpa::USRefl::TypeInfo<CanvasData>
 
     static constexpr FieldList fields = {
         Field{"points", &CanvasData::points},
+        Field{"selected", &CanvasData::selected},
+        Field{"selected_type", &CanvasData::selected_type},
+        Field{"points_type", &CanvasData::points_type},
+        Field{"cpL", &CanvasData::cpL},
+        Field{"cpR", &CanvasData::cpR},
         Field{"scrolling", &CanvasData::scrolling},
         Field{"opt_enable_grid", &CanvasData::opt_enable_grid},
         Field{"opt_enable_context_menu", &CanvasData::opt_enable_context_menu},
         Field{"adding_line", &CanvasData::adding_line},
+        Field{"mode", &CanvasData::mode},
+        Field{"update", &CanvasData::update},
+        Field{"parameterization", &CanvasData::parameterization},
+        Field{"coeff", &CanvasData::coeff},
     };
 };
 
