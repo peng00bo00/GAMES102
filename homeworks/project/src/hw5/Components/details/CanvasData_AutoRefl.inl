@@ -5,17 +5,45 @@
 #include <USRefl/USRefl.h>
 
 template<>
-struct Ubpa::USRefl::TypeInfo<CanvasData>
-    : Ubpa::USRefl::TypeInfoBase<CanvasData>
+struct Ubpa::USRefl::TypeInfo<CanvasData> :
+    TypeInfoBase<CanvasData>
 {
+#ifdef UBPA_USREFL_NOT_USE_NAMEOF
+    static constexpr char name[11] = "CanvasData";
+#endif
     static constexpr AttrList attrs = {};
-
     static constexpr FieldList fields = {
-        Field{"points", &CanvasData::points},
-        Field{"scrolling", &CanvasData::scrolling},
-        Field{"opt_enable_grid", &CanvasData::opt_enable_grid},
-        Field{"opt_enable_context_menu", &CanvasData::opt_enable_context_menu},
-        Field{"mode", &CanvasData::mode},
+        Field {TSTR("points"), &Type::points},
+        Field {TSTR("scrolling"), &Type::scrolling, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->Ubpa::valf2{ return { 0.f,0.f }; }},
+        }},
+        Field {TSTR("opt_enable_grid"), &Type::opt_enable_grid, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->bool{ return { true }; }},
+        }},
+        Field {TSTR("opt_enable_context_menu"), &Type::opt_enable_context_menu, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->bool{ return { true }; }},
+        }},
+        Field {TSTR("mode"), &Type::mode, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->int{ return {insert}; }},
+        }},
+        Field {TSTR("alpha"), &Type::alpha, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->float{ return {0.1}; }},
+        }},
+        Field {TSTR("order"), &Type::order, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->int{ return {4}; }},
+        }},
+        Field {TSTR("draw_interpolate"), &Type::draw_interpolate, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->bool{ return { false }; }},
+        }},
+        Field {TSTR("draw_chaikin"), &Type::draw_chaikin, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->bool{ return { false }; }},
+        }},
+        Field {TSTR("draw_bspline"), &Type::draw_bspline, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->bool{ return { false }; }},
+        }},
+        Field {TSTR("interpolate_points"), &Type::interpolate_points},
+        Field {TSTR("chaikin_points"), &Type::chaikin_points},
+        Field {TSTR("bspline_points"), &Type::bspline_points},
     };
 };
 

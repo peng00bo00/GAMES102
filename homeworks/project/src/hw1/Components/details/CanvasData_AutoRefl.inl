@@ -5,17 +5,51 @@
 #include <USRefl/USRefl.h>
 
 template<>
-struct Ubpa::USRefl::TypeInfo<CanvasData>
-    : Ubpa::USRefl::TypeInfoBase<CanvasData>
+struct Ubpa::USRefl::TypeInfo<CanvasData> :
+    TypeInfoBase<CanvasData>
 {
+#ifdef UBPA_USREFL_NOT_USE_NAMEOF
+    static constexpr char name[11] = "CanvasData";
+#endif
     static constexpr AttrList attrs = {};
-
     static constexpr FieldList fields = {
-        Field{"points", &CanvasData::points},
-        Field{"scrolling", &CanvasData::scrolling},
-        Field{"opt_enable_grid", &CanvasData::opt_enable_grid},
-        Field{"opt_enable_context_menu", &CanvasData::opt_enable_context_menu},
-        Field{"adding_line", &CanvasData::adding_line},
+        Field {TSTR("points"), &Type::points},
+        Field {TSTR("scrolling"), &Type::scrolling, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->Ubpa::valf2{ return { 0.f,0.f }; }},
+        }},
+        Field {TSTR("opt_enable_grid"), &Type::opt_enable_grid, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->bool{ return { true }; }},
+        }},
+        Field {TSTR("opt_enable_context_menu"), &Type::opt_enable_context_menu, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->bool{ return { true }; }},
+        }},
+        Field {TSTR("adding_line"), &Type::adding_line, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->bool{ return { false }; }},
+        }},
+        Field {TSTR("lagrange_interpolation"), &Type::lagrange_interpolation, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->bool{ return { false }; }},
+        }},
+        Field {TSTR("rbf_interpolation"), &Type::rbf_interpolation, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->bool{ return { false }; }},
+        }},
+        Field {TSTR("linear_regression"), &Type::linear_regression, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->bool{ return { false }; }},
+        }},
+        Field {TSTR("ridge_regression"), &Type::ridge_regression, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->bool{ return { false }; }},
+        }},
+        Field {TSTR("w_rbf"), &Type::w_rbf},
+        Field {TSTR("w_lr"), &Type::w_lr},
+        Field {TSTR("w_rr"), &Type::w_rr},
+        Field {TSTR("n_order"), &Type::n_order, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->int{ return 3; }},
+        }},
+        Field {TSTR("sigma"), &Type::sigma, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->float{ return 100; }},
+        }},
+        Field {TSTR("lambda"), &Type::lambda, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->float{ return 0; }},
+        }},
     };
 };
 
