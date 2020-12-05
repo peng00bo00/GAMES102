@@ -17,6 +17,14 @@ struct DenoiseData {
 	[[UInspector::tooltip("random scale")]]
 	float randomScale = 1.f;
 
+	[[UInspector::range(std::pair{ 0.f, 1.f })]]
+	[[UInspector::tooltip("Lambda")]]
+	float lambda = 0.1f;
+
+	[[UInspector::range(std::pair{ 0, 500 })]]
+	[[UInspector::tooltip("Num Step")]]
+	int num_step = 100;
+
 	std::shared_ptr<Ubpa::Utopia::Mesh> mesh;
 
 	[[UInspector::hide]]

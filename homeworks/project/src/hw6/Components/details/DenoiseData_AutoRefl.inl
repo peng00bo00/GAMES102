@@ -18,6 +18,16 @@ struct Ubpa::USRefl::TypeInfo<DenoiseData> :
             Attr {TSTR(UInspector::min_value), 0.f},
             Attr {TSTR(UInspector::tooltip), "random scale"},
         }},
+        Field {TSTR("lambda"), &Type::lambda, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->float{ return 0.1f; }},
+            Attr {TSTR(UInspector::range), std::pair{0.f,1.f}},
+            Attr {TSTR(UInspector::tooltip), "Lambda"},
+        }},
+        Field {TSTR("num_step"), &Type::num_step, AttrList {
+            Attr {TSTR(UMeta::initializer), []()->int{ return 100; }},
+            Attr {TSTR(UInspector::range), std::pair{0,1000}},
+            Attr {TSTR(UInspector::tooltip), "Num Step"},
+        }},
         Field {TSTR("mesh"), &Type::mesh},
         Field {TSTR("heMesh"), &Type::heMesh, AttrList {
             Attr {TSTR(UMeta::initializer), []()->std::shared_ptr<HEMeshX>{ return { std::make_shared<HEMeshX>() }; }},
