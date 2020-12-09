@@ -6,7 +6,17 @@
 
 #include <spdlog/spdlog.h>
 
+#include <Eigen/Sparse>
+#include <Eigen/SparseQR>
+# define M_PI           3.14159265358979323846
+
 using namespace Ubpa;
+
+typedef Eigen::SparseMatrix<float> SpMat;
+typedef Eigen::SparseVector<float> SpVec;
+
+float cot(Vertex* const A, Vertex* const B, Vertex* const C);
+int findVertex(std::vector<Vertex*> const vector, Vertex* const P);
 
 void DenoiseSystem::OnUpdate(Ubpa::UECS::Schedule& schedule) {
 	schedule.RegisterCommand([](Ubpa::UECS::World* w) {
@@ -56,6 +66,154 @@ void DenoiseSystem::OnUpdate(Ubpa::UECS::Schedule& schedule) {
 					}
 
 					spdlog::info("Add noise success");
+				}();
+			}
+
+			if (ImGui::Button("Minimal Surface")) {
+				[&]() {
+					if (!data->mesh) {
+						spdlog::warn("mesh is nullptr");
+						return;
+					}
+
+					// initialization
+					size_t N = data->heMesh->Vertices().size();
+					SpMat L(N, N);
+					SpVec dx(N), dy(N), dz(N);
+
+					// loop over all the vertices
+					for (size_t i = 0; i < N; i++)
+					{
+						Vertex* P = data->heMesh->Vertices().at(i);
+
+						// boundary vertices
+						if (P->IsOnBoundary())
+						{
+							L.insert(i, i) = 1.f;
+							dx.insert(i) = P->position[0];
+							dy.insert(i) = P->position[1];
+							dz.insert(i) = P->position[2];
+						}
+						// inner vertices
+						else {
+							auto* he = P->HalfEdge();
+							float wi = 0.f;
+							do {
+								Vertex* Q = he->End();
+								int j = findVertex(data->heMesh->Vertices(), Q);
+
+								Vertex* V1 = he->Next()->End();
+								Vertex* V2 = he->Pair()->Next()->End();
+
+								float wj = cot(P, Q, V1) + cot(P, Q, V2);
+
+								wi += wj;
+								L.insert(i, j) = -wj;
+
+								he = he->Pair()->Next();
+							} while (he != P->HalfEdge());
+
+							L.insert(i, i) = wi;
+						}
+					}
+
+					// solve the equation
+					L.makeCompressed();
+					Eigen::SparseQR<SpMat, Eigen::COLAMDOrdering<int>> solver;
+					solver.compute(L);
+
+					Eigen::VectorXf xx = solver.solve(dx);
+					Eigen::VectorXf xy = solver.solve(dy);
+					Eigen::VectorXf xz = solver.solve(dz);
+
+					// update coordinates
+					for (size_t i = 0; i < N; i++)
+					{
+						data->heMesh->Vertices().at(i)->position = valf3{xx[i], xy[i], xz[i]};
+					}
+
+					spdlog::info("Update coordinates succeed!");
+				}();
+			}
+
+			if (ImGui::Button("Surface Parameterization")) {
+				[&]() {
+					if (!data->mesh) {
+						spdlog::warn("mesh is nullptr");
+						return;
+					}
+
+					// initialization
+					size_t N = data->heMesh->Vertices().size();
+					SpMat L(N, N);
+					SpVec dx(N), dy(N);
+
+					// fix boundary vertices
+					std::vector<int> boundary_idx;
+					auto boundaries = data->heMesh->Boundaries()[0];
+
+					for (auto boundary : boundaries->NextLoop()) {
+						int idx = findVertex(data->heMesh->Vertices(), boundary->Origin());
+						boundary_idx.push_back(findVertex(data->heMesh->Vertices(), boundary->Origin()));
+					}
+
+					for (size_t j = 0; j < boundary_idx.size(); j++)
+					{
+						int i = boundary_idx[j];
+
+						dx.insert(i) = cos(2 * M_PI * j / boundary_idx.size());
+						dy.insert(i) = sin(2 * M_PI * j / boundary_idx.size());
+					}
+
+					// loop over all the vertices
+					for (size_t i = 0; i < N; i++)
+					{
+						Vertex* P = data->heMesh->Vertices().at(i);
+
+						// boundary vertices
+						if (P->IsOnBoundary())
+						{
+							L.insert(i, i) = 1.f;
+						}
+						// inner vertices
+						else {
+							auto* he = P->HalfEdge();
+							float wi = 0.f;
+							do {
+								Vertex* Q = he->End();
+								int j = findVertex(data->heMesh->Vertices(), Q);
+
+								Vertex* V1 = he->Next()->End();
+								Vertex* V2 = he->Pair()->Next()->End();
+
+								float wj = cot(P, Q, V1) + cot(P, Q, V2);
+
+								wi += wj;
+								L.insert(i, j) = -wj;
+
+								he = he->Pair()->Next();
+							} while (he != P->HalfEdge());
+
+							L.insert(i, i) = wi;
+						}
+					}
+
+					// solve the equation
+					L.makeCompressed();
+					Eigen::SparseQR<SpMat, Eigen::COLAMDOrdering<int>> solver;
+					solver.compute(L);
+
+					Eigen::VectorXf xx = solver.solve(dx);
+					Eigen::VectorXf xy = solver.solve(dy);
+
+					// update coordinates
+					for (size_t i = 0; i < N; i++)
+					{
+						data->heMesh->Vertices().at(i)->position = valf3{ xx[i], xy[i], 0.f };
+					}
+
+					spdlog::info("Update coordinates succeed!");
+
 				}();
 			}
 
@@ -133,4 +291,26 @@ void DenoiseSystem::OnUpdate(Ubpa::UECS::Schedule& schedule) {
 		}
 		ImGui::End();
 	});
+}
+
+
+float cot(Vertex* const A, Vertex* const B, Vertex* const C) {
+	valf3 CA = A->position - C->position;
+	valf3 CB = B->position - C->position;
+
+	if (CA.cross(CB).norm() < 1e-7) {
+		return 0.f;
+	}
+
+	return CA.dot(CB) / CA.cross(CB).norm();
+}
+
+int findVertex(std::vector<Vertex*> const vector, Vertex* const P) {
+	
+	for (int i = 0; i < vector.size(); i++)
+	{
+		if (vector[i] == P) return i;
+	}
+
+	return -1;
 }

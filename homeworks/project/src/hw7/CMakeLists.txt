@@ -14,6 +14,7 @@ foreach(cmpt ${components})
 endforeach()
 
 Ubpa_AddTarget(
+  INC "${PROJECT_SOURCE_DIR}/include/_deps"
   TEST
   SOURCE
     ${refls}
