@@ -161,6 +161,7 @@ void DenoiseSystem::OnUpdate(Ubpa::UECS::Schedule& schedule) {
 					{
 						int i = boundary_idx[j];
 
+						L.insert(i, i) = 1.f;
 						dx.insert(i) = cos(2 * M_PI * j / boundary_idx.size());
 						dy.insert(i) = sin(2 * M_PI * j / boundary_idx.size());
 					}
@@ -170,13 +171,8 @@ void DenoiseSystem::OnUpdate(Ubpa::UECS::Schedule& schedule) {
 					{
 						Vertex* P = data->heMesh->Vertices().at(i);
 
-						// boundary vertices
-						if (P->IsOnBoundary())
-						{
-							L.insert(i, i) = 1.f;
-						}
 						// inner vertices
-						else {
+						if (!(P->IsOnBoundary())) {
 							auto* he = P->HalfEdge();
 							float wi = 0.f;
 							do {
